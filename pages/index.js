@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { io } from "socket.io-client";
 import { nanoid } from "nanoid";
 import Link from "next/link";
@@ -13,7 +13,6 @@ export default function Home() {
   const joinRoomChat = (e) => {
     e.preventDefault();
     socket.emit("join-room", { id: room });
-    //socket.emit("join-room", { message: nanoid() });
   };
 
   return (
@@ -25,10 +24,10 @@ export default function Home() {
 
       <ChatComponents socket={socket} name={name} room={room} />
 
-      {/* <h1>Chat Room</h1>
+      <h1>Chat Room</h1>
       <Link href={`/${nanoid()}`}>
-        <a>List Room</a>
-      </Link> */}
+        <a>Random Room</a>
+      </Link>
     </div>
   );
 }

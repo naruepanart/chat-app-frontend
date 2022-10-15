@@ -13,7 +13,7 @@ const ChatComponents = ({ socket, name, room }) => {
       message: currentMessage,
       time: Date.now(),
     };
-
+    setCurrentMessage("");
     socket.emit("send-message", data);
     setMessageList((prev) => [...prev, data]);
   };
@@ -36,7 +36,7 @@ const ChatComponents = ({ socket, name, room }) => {
 
       {messageList.map((x, i) => (
         <p key={i}>
-           {x.name} : {x.time} - {x.message}
+          {x.name} : {x.time} - {x.message}
         </p>
       ))}
     </div>

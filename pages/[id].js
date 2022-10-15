@@ -1,43 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { io } from "socket.io-client";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/router";
+import ChatComponents from "../components/ChatComponents";
 
 const socket = io("http://localhost:3001", { transports: ["websocket"] });
 
 const ChatID = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [message, setMessage] = useState([]);
+  const [name, setName] = useState("");
 
-  const handlepost = (e) => {
-    e.preventDefault();
-    socket.emit("join-room", { message: nanoid() });
-  };
-
-  useEffect(() => {
+  React.useEffect(() => {
     let isMounted = false;
     socket.emit("join-room", { id });
-    socket.on({id}, (data) => {
-      setMessage([...message, data]);
-    });
+
+    setName(nanoid());
+
     return () => {
       isMounted = true;
     };
-  }, [id, message]);
+  }, [id]);
 
   return (
     <div>
-      <h1>ChatID</h1>
-      <p>{id}</p>
+      <h1>Chat : {id}</h1>
 
-      {/* <input type="text" value={nanoid()} onChange={(e) => setMessage(e.target.value)} /> */}
-      <button onClick={(e) => handlepost(e)}>Send massage</button>
-
-      <p>Recive message {id}</p>
-      {message.map((x, i) => (
-        <li key={i}>{x.message}</li>
-      ))}
+      <ChatComponents socket={socket} name={name} room={id} />
     </div>
   );
 };
