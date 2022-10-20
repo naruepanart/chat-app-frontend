@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+/* import useEffectOnce from "../hooks/useEffectOnce";
+import useIsMounted from "../hooks/useIsMounted"; */
 
 const ChatComponents = ({ socket, name, room }) => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -23,6 +26,19 @@ const ChatComponents = ({ socket, name, room }) => {
       setMessageList([...messageList, data]);
     });
   }, [messageList, socket]);
+
+  /*  useEffect(() => {
+    isMounted.current = true;
+    if (isMounted.current) {
+      console.log("first");
+      socket.on("rec", (data) => {
+        setMessageList([...messageList, data]);
+      });
+    }
+    return () => {
+      isMounted.current = false; // unmounted
+    };
+  }, [messageList, socket]); */
 
   return (
     <div>
