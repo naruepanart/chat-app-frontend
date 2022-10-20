@@ -7,9 +7,31 @@ const ChatComponents = ({ socket, name, room }) => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const messagesColumnRef = useRef(null);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    socket.emit("setup", () => room);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop-typing", () => setIsTyping(false));
+
+    socket.on("rec", (data) => {
+      setMessageList([...messageList, { ...data, require: false }]);
+    });
+    return () => {
+      socket.off("rec");
+    };
+  }, [messageList, room, socket]);
+
+  useEffect(() => {
+    messagesColumnRef.current.scrollTop = messagesColumnRef.current.scrollHeight;
+  }, [messageList]);
 
   const sendMessage = (e) => {
     e.preventDefault();
+    socket.emit("stop-typing", room);
     if (currentMessage === "") return;
     const data = {
       room: room,
@@ -21,18 +43,26 @@ const ChatComponents = ({ socket, name, room }) => {
     setMessageList([...messageList, { ...data, require: true }]);
   };
 
-  useEffect(() => {
-    socket.on("rec", (data) => {
-      setMessageList([...messageList, { ...data, require: false }]);
-    });
-    return () => {
-      socket.off("rec");
-    };
-  }, [messageList, socket]);
+  const handleTyping = (e) => {
+    setCurrentMessage(e.target.value);
 
-  useEffect(() => {
-    messagesColumnRef.current.scrollTop = messagesColumnRef.current.scrollHeight;
-  }, [messageList]);
+    if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", room);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop-typing", room);
+        setTyping(false);
+      }
+    }, timerLength);
+  };
 
   return (
     <div>
@@ -62,14 +92,15 @@ const ChatComponents = ({ socket, name, room }) => {
         <input
           className={styles.messageInput}
           type="text"
-          placeholder="Type a message..."
+          placeholder={isTyping ? "Someone Typing message..." : undefined}
           value={currentMessage}
-          onChange={(e) => setCurrentMessage(e.target.value)}
-          onKeyPress={(e) => {
+          onChange={handleTyping}
+          onKeyDown={(e) => {
             if (e.key === "Enter") {
               sendMessage(e);
             }
           }}
+          //onKeyDown={sendMessage}
         />
       </div>
     </div>

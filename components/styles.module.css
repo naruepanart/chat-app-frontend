@@ -32,7 +32,7 @@
 
 /* Messages */
 .messagesColumn {
-  height: 85vh;
+  height: 75vh;
   overflow: auto;
 }
 .message {
