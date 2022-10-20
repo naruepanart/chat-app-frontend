@@ -6,7 +6,6 @@ const ChatComponents = ({ socket, name, room }) => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
 
-
   const sendMessage = (e) => {
     e.preventDefault();
     if (currentMessage === "") return;
@@ -14,16 +13,15 @@ const ChatComponents = ({ socket, name, room }) => {
       room: room,
       name: name,
       message: currentMessage,
-      time: Date.now(),
     };
     setCurrentMessage("");
     socket.emit("send-message", data);
-    setMessageList((prev) => [...prev, data]);
+    setMessageList([...messageList, { ...data, require: true }]);
   };
 
   useEffect(() => {
     socket.on("rec", (data) => {
-      setMessageList([...messageList, data]);
+      setMessageList([...messageList, { ...data, require: false }]);
     });
   }, [messageList, socket]);
 
@@ -52,7 +50,15 @@ const ChatComponents = ({ socket, name, room }) => {
 
       {messageList.map((x, i) => (
         <p key={i}>
-          {x.name} : {x.time} - {x.message}
+          {x.require ? (
+            <p style={{ backgroundColor: "blue" }}>
+              {x.name} : {x.message}
+            </p>
+          ) : (
+            <p style={{ backgroundColor: "#f5f5f5" }}>
+              {x.name} : {x.message}
+            </p>
+          )}
         </p>
       ))}
     </div>
